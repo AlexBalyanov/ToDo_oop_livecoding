@@ -1,5 +1,12 @@
 export const todos = [
-  "11111111",
-  "22222222",
-  "333333333",
+  {
+    id: 1,
+    name: "Alex",
+    completed: true,
+  },
+  {
+    id: 2,
+    name: "Yarik",
+    completed: false,
+  }
 ];
