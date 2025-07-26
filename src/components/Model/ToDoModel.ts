@@ -1,4 +1,4 @@
-import {IToDoItem} from "../types";
+import {IToDoItem} from "../../types";
 
 export class ToDoModel {
   protected items: IToDoItem[];
