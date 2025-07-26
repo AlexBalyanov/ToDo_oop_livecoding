@@ -1,16 +1,24 @@
 import "./styles/styles.css"
 import {ToDoModel} from "./components/Model/ToDoModel";
 import {todos} from "./utils/constants";
-import {ToDoApi} from "./components/Model/ToDoApi";
+import {ToDoApi} from "./components/CommunicationApi/ToDoApi";
+import {Item} from "./components/View/Item";
+import {cloneTemplate} from "./utils/utils";
+import {EventEmitter} from "./components/base/Events";
+import {Page} from "./components/View/Page";
 
-const toDoModel = new ToDoModel();
+const api = new ToDoApi('https://jsonplaceholder.typicode.com');
+const itemTemplate = document.querySelector('#todo-item-template') as HTMLTemplateElement;
+const events = new EventEmitter();
+const toDoModel = new ToDoModel(events);
+const page = new Page(document.querySelector('.page__content') as HTMLElement);
 
 // Проверка модели данных
 // toDoModel.setItems(todos);
 // console.log(toDoModel);
 // console.log(toDoModel.getItem(2))
 
-const api = new ToDoApi('https://jsonplaceholder.typicode.com');
+
 
 api.getTasks()
   .then((data) => {
@@ -18,4 +26,28 @@ api.getTasks()
     console.log(toDoModel);
   })
   .catch(err => console.error(err));
+
+//Проверка модели представления
+// const listElement = document.querySelector('.todos__list') as HTMLUListElement;
+//
+// const card1 = new Item(cloneTemplate(itemTemplate));
+// const testObj = {
+//   name: 'watch a gachi videos',
+//   completed: true,
+// }
+//
+// listElement.prepend(card1.render(testObj))
+// card1.render({name: 'MAKE a gachi video'})
+
+events.on('items:changed', () => {
+  const itemsHTMLArray = toDoModel.getItems()
+    .map((item) => new Item(cloneTemplate(itemTemplate)).render(item));
+  page.render(
+    {
+      toDoList: itemsHTMLArray,
+      tasksTotal: toDoModel.getTotal(),
+      tasksDone: toDoModel.getDone(),
+    }
+  )
+});
 

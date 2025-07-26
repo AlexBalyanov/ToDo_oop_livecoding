@@ -1,20 +1,24 @@
 import {IToDoItem} from "../../types";
+import {IEvents} from "../base/Events";
 
 export class ToDoModel {
   protected items: IToDoItem[];
 
-  constructor() {}
+  constructor(protected events: IEvents) {}
 
   addItem(item: IToDoItem) {
     this.items.push(item);
+    this.events.emit('items:changed');
   }
 
   setItems(items: IToDoItem[]) {
     this.items = items;
+    this.events.emit('items:changed');
   }
 
   deleteItem(id: number) {
     this.items = this.items.filter((item) => item.id !== id);
+    this.events.emit('items:changed');
   }
 
   getItems(): IToDoItem[] {
@@ -28,6 +32,7 @@ export class ToDoModel {
   checkItem(id: number) {
     const item = this.getItem(id);
     item.completed = !item.completed;
+    this.events.emit('items:changed');
   }
 
   getTotal() {
