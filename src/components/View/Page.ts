@@ -14,7 +14,7 @@ export class Page extends Component<IPage> {
 
   constructor(container: HTMLElement) {
     super(container);
-    this.toDoContainer = ensureElement('.todos', this.container);
+    this.toDoContainer = ensureElement('.todos__list', this.container);
     this.elementTotal = ensureElement('.todos__total', this.container);
     this.elementDone = ensureElement('.todos__done', this.container);
   }

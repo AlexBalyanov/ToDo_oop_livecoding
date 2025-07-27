@@ -6,19 +6,14 @@ import {Item} from "./components/View/Item";
 import {cloneTemplate} from "./utils/utils";
 import {EventEmitter} from "./components/base/Events";
 import {Page} from "./components/View/Page";
+import {Form} from "./components/View/Form";
 
 const api = new ToDoApi('https://jsonplaceholder.typicode.com');
 const itemTemplate = document.querySelector('#todo-item-template') as HTMLTemplateElement;
 const events = new EventEmitter();
 const toDoModel = new ToDoModel(events);
 const page = new Page(document.querySelector('.page__content') as HTMLElement);
-
-// Проверка модели данных
-// toDoModel.setItems(todos);
-// console.log(toDoModel);
-// console.log(toDoModel.getItem(2))
-
-
+const form = new Form(document.querySelector('.todos__form') as HTMLElement, events);
 
 api.getTasks()
   .then((data) => {
@@ -26,6 +21,45 @@ api.getTasks()
     console.log(toDoModel);
   })
   .catch(err => console.error(err));
+
+events.on('items:changed', () => {
+  const itemsHTMLArray = toDoModel.getItems()
+    .map((item) => new Item(cloneTemplate(itemTemplate), events).render(item));
+  page.render({
+      toDoList: itemsHTMLArray,
+      tasksTotal: toDoModel.getTotal(),
+      tasksDone: toDoModel.getDone(),
+    })
+});
+
+events.on('item:check', ({id}: {id: number}) => {
+  toDoModel.checkItem(id);
+  //тут по-хорошему так же нужен запрос на сервер, после чего работать уже с ответом
+});
+
+events.on('item:delete', ({id}: {id: number}) => {
+  toDoModel.deleteItem(id);
+  //тут по-хорошему так же нужен запрос на сервер, после чего работать уже с ответом
+});
+
+events.on('item:copy', ({id}: {id: number}) => {
+  const {title} = toDoModel.getItem(id);
+  api.addTask({title, completed: false})
+    .then((item) => {
+      toDoModel.addItem(item);
+      //фейковый сервер jsonplaceholder не создает новый айди, поэтому копирование работает некорректно
+    })
+    .catch(err => console.error(err));
+});
+
+events.on('form:submit', ({value}: {value: string}) => {
+  api.addTask({title: value, completed: false})
+    .then((item) => {
+      toDoModel.addItem(item);
+      form.render({value: ''});
+    })
+    .catch(err => console.error(err));
+});
 
 //Проверка модели представления
 // const listElement = document.querySelector('.todos__list') as HTMLUListElement;
@@ -39,15 +73,8 @@ api.getTasks()
 // listElement.prepend(card1.render(testObj))
 // card1.render({name: 'MAKE a gachi video'})
 
-events.on('items:changed', () => {
-  const itemsHTMLArray = toDoModel.getItems()
-    .map((item) => new Item(cloneTemplate(itemTemplate)).render(item));
-  page.render(
-    {
-      toDoList: itemsHTMLArray,
-      tasksTotal: toDoModel.getTotal(),
-      tasksDone: toDoModel.getDone(),
-    }
-  )
-});
+// Проверка модели данных
+// toDoModel.setItems(todos);
+// console.log(toDoModel);
+// console.log(toDoModel.getItem(2))
 

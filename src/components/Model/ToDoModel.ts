@@ -7,7 +7,7 @@ export class ToDoModel {
   constructor(protected events: IEvents) {}
 
   addItem(item: IToDoItem) {
-    this.items.push(item);
+    this.items.unshift(item);
     this.events.emit('items:changed');
   }
 
